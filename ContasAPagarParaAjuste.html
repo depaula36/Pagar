@@ -1,0 +1,1262 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contas a pagar</title>
+
+    <style>
+
+    body {
+        background-color: white;
+    }
+
+    #paragrafoForm {
+        margin-top: 15px;
+        margin-left: 5px;
+        margin-bottom: 15px;
+    }
+    #agencia {
+        
+        background-color: white;
+        
+    }
+
+    #carrega{
+        
+        margin-left: 5px;
+
+    }
+    
+    #resetar {
+        
+        margin-left: 5px;
+    }
+
+    #somaGeral {
+        margin-top: 15px;
+        margin-left: 5px;
+
+
+    }
+       
+    #div1{
+        
+        margin-left: 5px;
+    }
+
+    #formulario1 {
+        border-width: thick;
+        border-style: double;
+        border-color: blue;
+        width: 45%;
+        height: 20%;
+        
+        
+    }
+
+    #tabela {
+        margin-top: 50px;
+    }
+
+       
+    #tabelaComplementar {
+        margin-top: 10px;
+    }
+
+    
+
+    
+
+    .laranja {
+        padding-top: 100px;
+        background-color: orangered;
+        border-color: orange;        
+        
+
+    }
+
+    .amarelo {
+        background-color: yellow;
+    }
+
+    .azul {
+        background-color: blue;
+    }
+
+    .verde {
+        background-color: green;
+    }
+
+
+    </style>
+
+    
+
+
+
+</head>
+<body>
+
+    <form id="formulario1">
+
+        <div>
+            <p id="paragrafoForm">Agência com quatro dígitos: <input type="Text" id="agencia"  maxlength=4 size= 1> </p>
+        </div>
+            
+        <div>
+            <p id="paragrafoForm"> CVS a ser lido: <input type="file" id="carrega"> </p>
+        </div>
+
+        <div> 
+            <input type="reset" value="Reset para novo carregamento" id="resetar">
+        </div>
+
+        <div id="somaGeral" > 
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Valor total da Planilha</th>
+                          
+                    </tr>
+                </thead>
+                <tbody id="tbody0">
+            </table>
+        </div>
+
+    </form>
+
+              
+        
+    <div> 
+        
+        <table border ="2" id="tabela">
+            <thead>
+                <tr class='laranja'>
+                    <th>SR</th>
+                    <th>UF</th>
+                    <th>Unidade</th>
+                    <th>Analítico</th>
+                    <th>Nome</th>
+                    <th>Data Mov</th>
+                    <th>Data Efet</th>
+                    <th>Origem</th>
+                    <th>Evento</th>
+                    <th>Doc</th>
+                    <th>OL</th>
+                    <th>Valor-Módulo</th>
+                    <th>D/C</th>
+                    <th>Valor</th>
+                    <th>Aviso</th>
+                    <th>Incoerente</th>
+                    <th>Numero-no-Historico</th>
+                    <th>Historico</th>
+                    <th>Referência/DOC</th>
+                    <th>Número da Linha</th>
+                       
+                     
+                </tr>
+            </thead>
+            <tbody id="tbody">
+
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <table border ="1" id="tabelaComplementar">
+            <thead class="amarelo">
+                <tr>
+                    <th>Somatório por Doc</th>
+                    <th>Números das Linhas</th>
+                    <th>Analíticos</th>
+                                         
+                     
+                </tr>
+            </thead>
+            <tbody id="tabelaDoc">
+
+            </tbody>
+    </div>
+
+
+    <div>
+        <table border ="1" id="tabelaComplementar">
+            <thead class="amarelo">
+                <tr>
+                    <th>Docs não capturados</th>
+                    <th>Linhas</th>
+                    
+                                         
+                     
+                </tr>
+            </thead>
+            <tbody id="tabelaDoc2">
+
+            </tbody>
+    </div>
+
+
+    <div>
+        <table border ="1" id="tabelaComplementar">
+            <thead class="amarelo">
+                <tr>
+                    <th>OLs não capturadas (agrupado)</th>
+                    <th>Linhas (agrupado)</th>
+                    
+                                         
+                     
+                </tr>
+            </thead>
+            <tbody id="tabelaDoc3">
+
+            </tbody>
+    </div>
+
+    
+
+    
+
+
+    
+
+    
+    <!--
+    <div>
+       
+    </div>
+    -->
+    
+
+        
+
+    
+
+</body>
+    
+<script>
+
+   
+    var arquivo = new FileReader();  // cria instância de objeto leitor
+    var arquivoLido  = document.getElementById("carrega");
+
+    var agencia = document.getElementById("agencia");
+    var analitico = document.getElementById("analitico");
+
+    agencia.onchange = function () {
+        agenciaDefinida = agencia.value;
+        //console.log (agenciaDefinida);
+    }        
+       
+    arquivoLido.onchange = function (event) { 
+        //console.log(arquivoLido); // elemento html p JS bruto
+        arquivoLido = arquivoLido.files[0]; // quando "change", seleciona o arquivo
+        //console.log(arquivoLido); // arquivo já selecionado corretamente
+        //console.log(arquivo); // estado atual do objeto leitor sem ler nada
+        arquivo.readAsText(arquivoLido); // lê arquivo como string e entrega p/ result
+        arquivo.onload = function (event) {
+            //console.log(arquivo.result); // propriedade do objeto leitor com resultado string
+            //console.log(arquivo); // estado atual do obj leitor com leitura já completa por aguard load > readyState 2
+               
+            
+            var agenciaMovimento = "\\d{4}\;[A-Z]{2}\;TROCAR.*"; // defino uma string para alteração
+            agenciaMovimento = agenciaMovimento.replace ("TROCAR", agenciaDefinida); // altero a string para campo definido pelo usuário
+            agenciaMovimento = new RegExp(agenciaMovimento,"g");
+            //console.log (agenciaMovimento); // mostra regexp correta
+
+            var linhasAgMov; // será objeto com várias informações por pequisa do while-exec
+            var arrayLinhasAgMov = []; // será array com objeto das linhas das ags de mov 
+           
+            
+                       
+
+            while (linhasAgMov = agenciaMovimento.exec(arquivo.result)) {// vai pesquisando linhas com ag de movimento
+                                
+                arrayLinhasAgMov.push(" "+linhasAgMov[0]+";"+";"+";"); // vai acrescentando em um array strings concatenadas: espaços vazios + strings das linhas com agência movimento
+               
+               
+            }
+            //console.log(arrayLinhasAgMov); // mostra array com strings
+            //console.log("terminei de procurar linhas"); // para saber que terminou de pesquisar por linhas da ag de mov
+
+            B=0 // contador
+
+            
+
+            var arrDeIndices = [] // array com elementos arrDeIndices
+
+            while (B<arrayLinhasAgMov.length) { // insere nos arrays elementos "vazios"
+                    
+                
+                arrDeIndices.push(arrDeIndices[B])
+                arrDeIndices[B]=[]
+                   
+                
+
+                B++
+            }
+
+            B=0  // contador zerado para uso
+
+            var cont = 0; // contador
+            var posicao = 0; // contador da posição
+            
+
+            
+
+            while (cont<arrayLinhasAgMov.length) {
+                while (posicao<arrayLinhasAgMov[cont].length) { // pesquisará posições nos elementos strings do array arrayLinhasAgMov
+                        posicao = arrayLinhasAgMov[cont].indexOf(";", posicao)// retorna posição da string na string procurada. 
+                        if (posicao ===-1) break // se não acha, passa para o contador seguinte
+                        
+                        
+                        arrDeIndices[cont].push(posicao) //  array guarda posições para a string ";" nas strings arrayLinhasAgMov[cont] para separação dos campos
+                        
+                        
+                        posicao++ // incremento habitual para while interior
+                        
+                            
+                }
+                    posicao = 0 //devo zerar POSIÇÃO para pesquisa na próxima string arrayLinhasAgMov[cont]
+                    cont++ // incremento habitual para while exterior; permitirá percorrer todas as strings arrayLinhasAgMov[cont] da array arrayLinhasAgMov
+            }
+
+            
+                        
+            // Criando arrays para impressão
+
+            cont=0
+
+            arrayDeElementosParaImpressao = [] // array maior que tem como elementos outros arrays
+            while (cont<arrDeIndices.length) {
+
+                arrayDeElementosParaImpressao.push(arrayDeElementosParaImpressao[cont])
+                arrayDeElementosParaImpressao[cont]= []
+                cont++
+                //console.log(arrayDeElementosParaImpressao[cont])
+
+            }
+            
+
+
+
+            var posicaoNaLinha = 0
+
+            cont = 0  // zerando contador para novo uso
+            A = 0 // contador
+
+                       
+
+            
+            while (cont<arrDeIndices.length) { // pesquisa até fim dos elementos; o valor do elemento é posição de ;
+                while (posicaoNaLinha<arrayLinhasAgMov[cont].length) { 
+
+                    //debugger
+                    elemento = arrayLinhasAgMov[cont].substring(posicaoNaLinha +1, arrDeIndices[cont][0+A]) // cria a string para o campo; +1 na poiscaoNaLinha para desprezar o primeiro " " ou o próprio ";"; cada arrayLinhasAgMov[cont] tem um arrDeIndices[cont] associado
+                    if (posicaoNaLinha +1 >=arrayLinhasAgMov[cont].length) { // se chega no fim, deve parar a pesquisa
+                        break;
+                    }
+                    if (elemento === "") { // para deixar campo em branco bem visível
+                        elemento = "--------"
+                    }
+
+                    arrayDeElementosParaImpressao[cont].push(elemento); // No arrayDeElementosParaImpressao[cont] existirá os campos já separados como elemento
+
+                    //console.log(elemento)
+                    
+                                            
+                    A++ // contador que permite definir qual era a posição do ";" na arrayLinhasAgMov[cont]
+
+                    posicaoNaLinha = arrDeIndices[cont][0+A-1] // nova posição é posição em foi achado o último; -1 para compensar a soma de +1 logo acima
+                        
+                            
+                }
+                posicaoNaLinha = 0 // zera posição para nova pesquisa em cont++ seguinte
+                cont++ // incremento habitual para while exterior
+                A=0 // zera posição para nova pesquisa em cont++ seguinte
+            }
+
+            // IMPORTANTE: AQUI SIMULA CAPTURA DO SINAFWEB!!!! (INCLUSÃO SERÁ AQUI COM DR LANDIM!!!)
+
+            
+            //arrayDeElementosParaImpressao[0][17] = "blá blá blá 91280/2021 xxx yyy"
+            //arrayDeElementosParaImpressao[2][17] = "blá blá blá 91379/2021 xxx yyy"
+            //arrayDeElementosParaImpressao[7][17] = "blá blá blá 91406/2021 xxx yyy"
+            //arrayDeElementosParaImpressao[8][17] = "blá blá blá xxxx/2021 xxx yyy"
+            //arrayDeElementosParaImpressao[9][17] = "blá blá blá 91379/2021 xxx yyy"
+            //arrayDeElementosParaImpressao[10][17] = "blá blá blá 91800/2021 xxx yyy"
+            //arrayDeElementosParaImpressao[11][17] = "blá blá blá 91379/2021 xxx yyy"
+            
+            
+
+            cont= 0;
+            somaValorModulo= 0;
+            somaValor= 0;
+            
+            
+            while (cont<arrayLinhasAgMov.length) { // no fim vai "transformar" campos em números de 2 casas e totalizar
+
+                arrayDeElementosParaImpressao[cont][11]= parseFloat(arrayDeElementosParaImpressao[cont][11].replace(".","").replace(",","."))
+                
+                //console.log(typeof(arrayDeElementosParaImpressao[cont][11]))
+                somaValorModulo= somaValorModulo + arrayDeElementosParaImpressao[cont][11]
+                somaValorModuloImpressao = somaValorModulo.toFixed(2)
+                
+
+                arrayDeElementosParaImpressao[cont][13]= parseFloat(arrayDeElementosParaImpressao[cont][13].replace(".","").replace(",","."))
+                somaValor= somaValor + arrayDeElementosParaImpressao[cont][13]
+                somaValorImpressao = somaValor.toFixed(2)
+                
+
+
+                    
+                cont++
+
+                
+                    
+                               
+            }
+
+            //arrayDeElementosParaImpressao[7][13] = -85081.76 Cuidado para não tirar o comentário aqui (foi um teste)
+
+            
+            // Aqui se procura o padrão para leitura no histórico do SINAF
+
+            contB2 = 0
+            proc=""
+            while (contB2<arrayDeElementosParaImpressao.length) {
+                   
+
+                proc = /(\d{4})\/2021/.exec(arrayDeElementosParaImpressao[contB2][17])	
+                if (proc !== null) {
+                    //console.log(proc[1])
+                    arrayDeElementosParaImpressao[contB2][16] = proc[1]
+
+                }
+                //console.log(typeof(proc))
+                contB2++
+        
+
+
+
+            }
+
+
+            cont = 0
+
+            //(somaValorModuloImpressao);
+            //console.log(somaValorImpressao);
+            
+
+
+
+            B3 = 0
+
+            arrayDePintura = [] // array que indicará se liha deverá ser pintada
+            arrayDePinturaAzul = [] // array que indicará se liha deverá ser pintada
+            
+
+            while (B3<arrayLinhasAgMov.length) { // insere no array arrayDePintura elementos false como padrão 
+                    
+                
+                arrayDePintura.push(false)
+                arrayDePinturaAzul.push(false)
+
+
+                
+                       
+                    
+    
+                B3++
+            }
+    
+            B3=0
+
+            contB = 0 // contador
+            contB2 =0 // contador
+            
+            while(contB<arrayDeElementosParaImpressao.length) {
+            
+                
+
+                if  (arrayDeElementosParaImpressao[contB][10] === "1102040") {
+                    arrayDeElementosParaImpressao[contB][18] = arrayDeElementosParaImpressao[contB][9]
+                    
+                }
+
+                //console.log(typeof(Number(arrayDeElementosParaImpressao[contB][16])))
+                //debugger
+                if  ((arrayDeElementosParaImpressao[contB][10] === "3142" || arrayDeElementosParaImpressao[contB][10] === "1107")  && typeof(Number(arrayDeElementosParaImpressao[contB][16])) === "number" ) {
+                    arrayDeElementosParaImpressao[contB][18] = arrayDeElementosParaImpressao[contB][16]
+                    
+                }
+
+                contB++
+
+
+
+            }
+                                   
+            
+            
+            contB = 0 // contador
+            contB2 =0 // contador
+
+                    
+            
+            
+
+            
+           
+            B3 = 0
+
+            
+            arrayDoc =[]
+            arrayIndices =[]
+            arrayDocIndices = []
+            arrayDocIndicesString = []
+
+            while (B3<arrayLinhasAgMov.length) { // insere nos arrays elementos "vazios"
+                    
+                
+                //debugger
+                arrayDoc.push(arrayDeElementosParaImpressao[B3][18]); // arrayDoc  é array com todos os Referência/DOC, repetidos mesmo
+                arrayIndices.push(arrayIndices[B3])
+                arrayIndices[B3] = []
+                arrayDocIndices.push(arrayDocIndices[B3]) // arrayDocIndices é array com todos os arrayIndices os quais tem como elementos índices onde se encontram  todos Referência/DOC
+                arrayDocIndices[B3] = []
+                
+
+
+                
+                       
+                    
+    
+                B3++
+            }
+    
+            B3=0
+            //console.log(arrayDoc);
+            //console.log(arrayDocIndices);
+
+                 
+
+           
+            /*
+            
+            B6=0
+            while (B6<arrayDoc.length) {
+                eval("arrayPosicaoElemento"+arrayDoc[B6]+"= []") // cria variável dinâmica com nome que descende do valor arrayDoc (sei que está repetindo criação, mas por custo X benefício, melhor deixar assim)
+                B6++
+            }
+            B6=0
+
+            */
+
+          
+            B4=0
+            posicao = 0
+            
+
+            while (B4<arrayDoc.length) {
+              
+                
+                //debugger
+                while (posicao<arrayDoc.length) { 
+                    if (arrayDoc[B4] === undefined) {break;}
+                    //debugger
+                    posicao = arrayDoc.indexOf(arrayDoc[B4], posicao) // busca no array arrayDoc o elemento arrayDoc[B4] - esse elemento será todos os elementos - e guarda na posição
+                    if (posicao ===-1) break // se não acha, passa para o contador seguinte
+                       
+                    //debugger
+                    
+                    arrayIndices[B4].push(posicao)
+                    if (arrayIndices[B4][arrayIndices[B4].length-1] < arrayIndices[B4][arrayIndices[B4].length-2]) {arrayIndices[B4].pop(); break;}
+                     
+                    posicao++ // incremento habitual para while interior
+                        
+
+                }   
+                posicao = 0 //devo zerar o contador=POSIÇÃO para outra pesquisa do cont
+                
+                B4++
+                //debugger
+                
+            }
+            B4 = 0
+            concatenado = []
+            concatenadoString = ""
+            while (B4<arrayDoc.length) {
+                //debugger
+                if (arrayDoc[B4] === undefined) {B4++; continue}
+                
+                concatenado = [arrayDoc[B4]].concat(arrayIndices[B4])
+                arrayDocIndices[B4].push(concatenado)
+                concatenadoString = concatenado.join()
+                //console.log(typeof(concatenadoString))
+                //console.log(concatenadoString)
+                arrayDocIndicesString.push(concatenadoString)
+
+                concatenado = []
+                concatenadoString = ""
+                B4++
+            
+            }
+            B4=0
+
+            Busca = new Set(arrayDocIndicesString) /// Muito importante!!!
+            Busca2 = Array.from(Busca) /// Muito importante!!!
+
+            //console.log(arrayDoc);
+            //console.log(arrayIndices);
+            //console.log(arrayDocIndices);
+            //console.log(arrayDocIndicesString);
+            //console.log(Busca);
+            //console.log(typeof(Busca))
+            //console.log(Busca2);
+
+            B4 = 0
+            posicao = 0
+            B5=0
+            SomaDoc = 0
+            ObjetoSomasDoc = {}
+            contadorLinhasSomaDoc = 0 
+            somaTotalDoc = 0
+
+            tabelaDoc = document.querySelector("#tabelaDoc")
+            linhasSomaDoc =[]
+            DocSoma =[]
+            DocLinhas = []
+            valor_DocSoma = []
+            valor_DocLinhas = []
+            DocAnaliticos = []
+            valor_DocAnaliticos = []
+            NumerosAnaliticosParaDoc = []
+                
+
+                
+            linhasSomaDoc[contadorLinhasSomaDoc] = []
+            DocSoma[contadorLinhasSomaDoc] = []
+            valor_DocSoma[contadorLinhasSomaDoc] = []
+            DocLinhas[contadorLinhasSomaDoc] = []
+            valor_DocLinhas[contadorLinhasSomaDoc] = []
+            DocAnaliticos[contadorLinhasSomaDoc] = []
+            valor_DocAnaliticos[contadorLinhasSomaDoc] = []
+            numeroElementosComDoc = 0
+
+            
+            while (B4<Busca2.length) {
+
+                elemento = Busca2[B4]
+                RefANumeroDoc = elemento.substring(0,4)
+                if(RefANumeroDoc === "----" ) {B4++; continue;} // Importante!!!
+                //RefANumeroDoc = Number(RefANumeroDoc)
+                RefAPosicoes = elemento.substring(5,)
+                //console.log(RefANumeroDoc)
+                //console.log(RefAPosicoes)
+                arrayPosicaoRefAPosicoes = RefAPosicoes.split(",")
+                arrayPosicaoRefAPosicoesParaAmostra = RefAPosicoes.split(",")
+
+                arrayPosicaoRefAPosicoesParaAmostra.forEach((v,i,a) => { a[i]++
+                    
+                }); // para ajustar a padrão de contagem de linhas de planilhas como excel - começa por 1 a contagem e não zero
+                //console.log(arrayPosicaoRefAPosicoes)
+                //console.log(arrayPosicaoRefAPosicoesParaAmostra)
+
+                B4++
+
+                
+                
+                while (B5<arrayPosicaoRefAPosicoes.length) {
+                    //debugger
+                    
+                    SomaDoc += arrayDeElementosParaImpressao[arrayPosicaoRefAPosicoes[B5]][13]
+                    //console.log (typeof(SomaDoc))
+                    SomaDocString = SomaDoc.toFixed(2); // Para mostrar com duas casas decimais na linha 683
+                    //console.log (SomaDocString)
+                    B5++
+                    ObjetoSomasDoc["Doc"+eval(RefANumeroDoc)] = SomaDoc
+                    
+                }
+
+                
+                
+                B5=0
+
+                // Tabela complementar de docs destacada pela cor. Laranja quando zera nas duas planilhas (na principal e na ...
+                // ... complementar), azul quando com dois analíticos > só pode acontecer na complementar
+                // DEVO APAGAR A LINHA DO COMENTÁRIO DO IF E ACERTAR NOMES DAS VARIÁVEIS!!! 
+
+                
+                linhasSomaDoc[contadorLinhasSomaDoc] = document.createElement('tr')
+                DocSoma[contadorLinhasSomaDoc] = document.createElement('td');
+                DocLinhas[contadorLinhasSomaDoc] = document.createElement('td');
+                DocAnaliticos[contadorLinhasSomaDoc] = document.createElement('td');
+
+                //debugger
+                valor_DocSoma[contadorLinhasSomaDoc] = document.createTextNode(RefANumeroDoc+": "+SomaDocString); // SomaDocString para mostrar com duaas casas
+                valor_DocLinhas[contadorLinhasSomaDoc] = document.createTextNode(arrayPosicaoRefAPosicoesParaAmostra); // arrayPosicaoRefAPosicoesParaAmostra para ajustar a padrão de contagem de linhas de planilhas como excel
+                numeroElementosComDoc = numeroElementosComDoc + arrayPosicaoRefAPosicoesParaAmostra.length
+                //debugger
+                arrayPosicaoRefAPosicoes.forEach((e,i) => { NumerosAnaliticosParaDoc.push(arrayDeElementosParaImpressao[e][3])})
+                //console.log(NumerosAnaliticosParaDoc)
+                filtroAnalitico = new Set(NumerosAnaliticosParaDoc) /// Muito importante!!!
+                FiltroAnalitico2 = Array.from(filtroAnalitico) /// Muito importante!!!
+                //console.log (filtroAnalitico)
+                A1 = 0 // contador
+                A2 = 0 // contador
+                somaDocAnalitico = 0
+                linhasDoAnalitico = []
+                arrayTotalPorAnalitico =[]
+                while (A1<FiltroAnalitico2.length) {
+                    while (A2<NumerosAnaliticosParaDoc.length) {
+                        if (FiltroAnalitico2[A1] === NumerosAnaliticosParaDoc[A2]) { 
+                            somaDocAnalitico = somaDocAnalitico + arrayDeElementosParaImpressao[arrayPosicaoRefAPosicoes[A2]][13];
+                            linhasDoAnalitico.push(arrayPosicaoRefAPosicoesParaAmostra[A2]);
+                                
+
+                        }
+                        A2++
+                            
+                    }
+                    A2=0
+                    //console.log (FiltroAnalitico2[A1] +"> "+ "Total:"+ somaDocAnalitico + "; Linhas: " + linhasDoAnalitico)
+                    arrayTotalPorAnalitico.push("  " + FiltroAnalitico2[A1] +"> "+ "Total:"+ somaDocAnalitico + "; Linha(s): " + linhasDoAnalitico + "  ")
+                    somaDocAnalitico = 0
+                    linhasDoAnalitico = []
+                    A1++
+                        
+                }
+                A1=0
+                A2=0
+                valor_DocAnaliticos[contadorLinhasSomaDoc] = document.createTextNode(arrayTotalPorAnalitico)
+                if (SomaDoc === 0 && arrayTotalPorAnalitico.length>1) {linhasSomaDoc[contadorLinhasSomaDoc].className = "azul"; arrayPosicaoRefAPosicoes.forEach(element => { arrayDePinturaAzul[element] = true } )}
+                if (SomaDoc === 0 && arrayTotalPorAnalitico.length===1) {linhasSomaDoc[contadorLinhasSomaDoc].className = "laranja" ; arrayPosicaoRefAPosicoes.forEach(element => { arrayDePintura[element] = true } )}
+                if (SomaDoc !== 0 && arrayTotalPorAnalitico.length>1) {linhasSomaDoc[contadorLinhasSomaDoc].className = "amarelo"}
+                arrayTotalPorAnalitico = []
+
+
+
+                DocSoma[contadorLinhasSomaDoc].appendChild(valor_DocSoma[contadorLinhasSomaDoc])
+                DocLinhas[contadorLinhasSomaDoc].appendChild(valor_DocLinhas[contadorLinhasSomaDoc])
+                DocAnaliticos[contadorLinhasSomaDoc].appendChild(valor_DocAnaliticos[contadorLinhasSomaDoc])
+                linhasSomaDoc[contadorLinhasSomaDoc].appendChild(DocSoma[contadorLinhasSomaDoc]);
+                linhasSomaDoc[contadorLinhasSomaDoc].appendChild(DocLinhas[contadorLinhasSomaDoc])
+                linhasSomaDoc[contadorLinhasSomaDoc].appendChild(DocAnaliticos[contadorLinhasSomaDoc])
+
+                tabelaDoc.appendChild(linhasSomaDoc[contadorLinhasSomaDoc])
+                contadorLinhasSomaDoc++
+                NumerosAnaliticosParaDoc = []
+                        
+                    
+
+                
+
+                //criar elementos
+                //aplicar um estilo no elemento
+                //criar nós
+                //vincular nós aos elementos
+                //vincular elementos ao docuemnto
+
+                
+
+                //console.log(RefANumeroDoc+" = "+SomaDoc)
+                //debugger
+                
+                //debugger
+                somaTotalDoc = somaTotalDoc + SomaDoc
+                SomaDoc = 0
+
+                
+                
+
+            }
+            //debugger
+            linhasSomaDoc[contadorLinhasSomaDoc] = document.createElement('tr')
+            DocSoma[contadorLinhasSomaDoc] = document.createElement('td');
+            valor_DocSoma[contadorLinhasSomaDoc] = document.createTextNode("Total de Docs: " + somaTotalDoc.toFixed(2) +" ("+ numeroElementosComDoc +")");
+            DocSoma[contadorLinhasSomaDoc].appendChild(valor_DocSoma[contadorLinhasSomaDoc])
+            //debugger
+            linhasSomaDoc[contadorLinhasSomaDoc].appendChild(DocSoma[contadorLinhasSomaDoc]);
+            tabelaDoc.appendChild(linhasSomaDoc[contadorLinhasSomaDoc])
+
+            B4=0
+
+            //console.log(somaTotalDoc)  // Totalizador1 !!!!
+
+            tabelaDoc2 = document.querySelector("#tabelaDoc2")
+            
+            
+            linhaslinhasSemDoc= []
+            semDoc = []
+            valor_semDoc = []
+            linhasSemDoc = []
+            valor_linhasSemDoc = []
+            linhasNaoSinafParaAmostra = []
+            linhasNaoPadraoParaAmostra = []
+            somaSemDoc1 = 0
+            somaSemDoc2 = 0
+            somaSemDocTotal = 0
+            
+            B4 = 0
+                      
+            semNada = arrayDoc.indexOf("--------")
+            //console.log (semNada)
+            numeroDetracos = 0
+            //debugger
+            
+            if (semNada !== -1) {
+                while (B4<arrayIndices[semNada].length) {
+                    if (arrayDeElementosParaImpressao[arrayIndices[semNada][B4]][17] === "--------" && (arrayDeElementosParaImpressao[arrayIndices[semNada][B4]][10] === "3142" || arrayDeElementosParaImpressao[arrayIndices[semNada][B4]][10] === "1107" )) {linhasNaoSinafParaAmostra.push(arrayIndices[semNada][B4]+1)}
+                    if (arrayDeElementosParaImpressao[arrayIndices[semNada][B4]][17] !== "--------" && arrayDeElementosParaImpressao[arrayIndices[semNada][B4]][16] === "--------" && (arrayDeElementosParaImpressao[arrayIndices[semNada][B4]][10] === "3142" || arrayDeElementosParaImpressao[arrayIndices[semNada][B4]][10] === "1107")) {linhasNaoPadraoParaAmostra.push(arrayIndices[semNada][B4]+1)}
+                    B4++
+                }
+
+            }
+            
+
+
+            linhasNaoSinafParaAmostra.forEach((e,i,a) => { somaSemDoc1 = somaSemDoc1 + arrayDeElementosParaImpressao[e-1][13]})
+            linhasNaoPadraoParaAmostra.forEach((e,i,a) => { somaSemDoc2 = somaSemDoc2 + arrayDeElementosParaImpressao[e-1][13]})
+            somaSemDocTotal = somaSemDoc1 + somaSemDoc2
+            numeroDetracos = linhasNaoSinafParaAmostra.length + linhasNaoPadraoParaAmostra.length
+
+
+
+            if (linhasNaoSinafParaAmostra.length === 0) {linhasNaoSinafParaAmostra = ["Não possui"]}
+            if (linhasNaoPadraoParaAmostra.length === 0) {linhasNaoPadraoParaAmostra = ["Não possui"]}
+            
+            //console.log(linhasNaoSinafParaAmostra)
+            //console.log(linhasNaoPadraoParaAmostra)
+            //console.log(somaSemDoc1)
+            //console.log(somaSemDoc2)
+
+            B4 = 0
+
+
+
+            linhaslinhasSemDoc[0] = document.createElement('tr')
+            linhaslinhasSemDoc[1] = document.createElement('tr')
+            linhaslinhasSemDoc[2] = document.createElement('tr')
+            semDoc[0] = document.createElement('td');
+            semDoc[1] = document.createElement('td');
+            semDoc[2] = document.createElement('td') // utilizei só para totalizar (para não ter que criar nova variável)
+            linhasSemDoc[0] = document.createElement('td');
+            linhasSemDoc[1] = document.createElement('td');
+
+            valor_semDoc[0] = document.createTextNode("Linhas de <Não Capturado no SINAFWEB>: "); 
+            valor_semDoc[1] = document.createTextNode("Linhas de SINAFWEB capturadas, mas padrão não localizado: "); 
+            valor_semDoc[2] = document.createTextNode("Total sem Docs: " + somaSemDocTotal.toFixed(2) +" ("+numeroDetracos+")"); 
+            valor_linhasSemDoc[0] = document.createTextNode(linhasNaoSinafParaAmostra); 
+            valor_linhasSemDoc[1] = document.createTextNode(linhasNaoPadraoParaAmostra); 
+
+            semDoc[0].appendChild(valor_semDoc[0])
+            semDoc[1].appendChild(valor_semDoc[1])
+            semDoc[2].appendChild(valor_semDoc[2])
+            linhasSemDoc[0].appendChild(valor_linhasSemDoc[0])
+            linhasSemDoc[1].appendChild(valor_linhasSemDoc[1])
+            linhaslinhasSemDoc[0].appendChild(semDoc[0]);
+            linhaslinhasSemDoc[0].appendChild(linhasSemDoc[0]);
+            linhaslinhasSemDoc[1].appendChild(semDoc[1]);
+            linhaslinhasSemDoc[1].appendChild(linhasSemDoc[1]);
+            linhaslinhasSemDoc[2].appendChild(semDoc[2]);
+
+            tabelaDoc2.appendChild(linhaslinhasSemDoc[0])
+            tabelaDoc2.appendChild(linhaslinhasSemDoc[1])
+            tabelaDoc2.appendChild(linhaslinhasSemDoc[2])
+
+            B4= 0
+
+            somaGeral = 0
+            arrayDeElementosNaoPrevistos = []
+            posicaoDeElementosNaoPrevistosParaAmostra = []
+            somaDeElementosNaoPrevistos = 0
+            linhasLinhasOLNaoCapturadas = []
+            OLNaoCapturadas = []
+            valor_OLNaoCapturadas = []
+            linhasOLNaoCapturadas = []
+            valor_linhasOLNaoCapturadas = []
+            numeroElementosOLnaoprevisto = 0
+            numeroLinhasDaPlanila = 0
+
+
+            while (B4<arrayDeElementosParaImpressao.length) {
+
+                somaGeral = somaGeral + arrayDeElementosParaImpressao[B4][13]
+                if (arrayDeElementosParaImpressao[B4][10] !== "1102040" && arrayDeElementosParaImpressao[B4][10] !== "3142" && arrayDeElementosParaImpressao[B4][10] !== "1107") { arrayDeElementosNaoPrevistos.push(arrayDeElementosParaImpressao[B4][10]); posicaoDeElementosNaoPrevistosParaAmostra.push([B4+1]); somaDeElementosNaoPrevistos = somaDeElementosNaoPrevistos + arrayDeElementosParaImpressao[B4][13]}
+                B4++
+
+            }
+            numeroLinhasDaPlanila = B4 // quando B4 sai do while está somado de +1 (coincide com acerto que deveria fazer de +1 para acertar número de elementos)
+
+            arrayDeElementosNaoPrevistos = new Set(arrayDeElementosNaoPrevistos) 
+            arrayDeElementosNaoPrevistosFiltrado = Array.from(arrayDeElementosNaoPrevistos) 
+            //console.log (somaGeral)
+            //console.log (arrayDeElementosNaoPrevistosFiltrado)
+            //console.log (posicaoDeElementosNaoPrevistosParaAmostra)
+            //console.log (somaDeElementosNaoPrevistos)
+
+            numeroElementosOLnaoprevisto = posicaoDeElementosNaoPrevistosParaAmostra.length
+
+            linhasLinhasOLNaoCapturadas[0] = document.createElement('tr')
+            linhasLinhasOLNaoCapturadas[1] = document.createElement('tr')
+           
+            OLNaoCapturadas[0] = document.createElement('td');
+            OLNaoCapturadas[1] = document.createElement('td'); // usei mesma referÊncia só para totalizar
+            
+            linhasOLNaoCapturadas[0] = document.createElement('td');
+            
+            
+            
+            if (arrayDeElementosNaoPrevistosFiltrado.length > 0) {
+                doisPontos = ": "
+            }
+            else {
+                doisPontos = ["Não Possui"]; posicaoDeElementosNaoPrevistosParaAmostra = ["Não Possui"]
+            }
+
+            valor_OLNaoCapturadas[0] = document.createTextNode(arrayDeElementosNaoPrevistosFiltrado + doisPontos); 
+            valor_OLNaoCapturadas[1] = document.createTextNode("Total de OLs não previstas: "+ somaDeElementosNaoPrevistos.toFixed(2) +" ("+ numeroElementosOLnaoprevisto + ")"); 
+            valor_linhasOLNaoCapturadas[0] = document.createTextNode(posicaoDeElementosNaoPrevistosParaAmostra); 
+
+            OLNaoCapturadas[0].appendChild(valor_OLNaoCapturadas[0])
+            OLNaoCapturadas[1].appendChild(valor_OLNaoCapturadas[1])
+            linhasOLNaoCapturadas[0].appendChild(valor_linhasOLNaoCapturadas[0])
+
+            linhasLinhasOLNaoCapturadas[0].appendChild(OLNaoCapturadas[0]);
+            linhasLinhasOLNaoCapturadas[0].appendChild(linhasOLNaoCapturadas[0]);
+            linhasLinhasOLNaoCapturadas[1].appendChild(OLNaoCapturadas[1]);
+
+
+            
+           
+
+            tabelaDoc3.appendChild(linhasLinhasOLNaoCapturadas[0])
+            tabelaDoc3.appendChild(linhasLinhasOLNaoCapturadas[1])
+
+
+
+            linhaSomaTotal = []
+            elementoSomaTotal = []
+            valor_elementoSomaTotal =[]
+            somaTotal = document.querySelector('#somaGeral')
+
+            linhaSomaTotal[0] = document.createElement('tr')
+            elementoSomaTotal[0] = document.createElement('td')
+            valor_elementoSomaTotal[0] = document.createTextNode((somaGeral.toFixed(2)) + " (" + numeroLinhasDaPlanila + ")") 
+            elementoSomaTotal[0].appendChild(valor_elementoSomaTotal[0])
+            linhaSomaTotal[0].appendChild(elementoSomaTotal[0])
+            tbody0.appendChild(linhaSomaTotal[0])
+
+            //debugger
+            NumeroAComparar = Number(somaTotalDoc.toFixed(2)) + Number(somaSemDocTotal.toFixed(2)) + Number(somaDeElementosNaoPrevistos.toFixed(2))
+            if (Number(somaGeral.toFixed(2)) === Number(NumeroAComparar.toFixed(2)) && (numeroLinhasDaPlanila === numeroElementosComDoc + numeroElementosOLnaoprevisto + numeroDetracos)) {linhaSomaTotal[0].className = "verde"}
+
+
+
+
+            //somaTotal.textContent = "Total da Planilha: " + somaGeral.toFixed(2)
+
+
+
+            //criar elementos
+            //aplicar um estilo no elemento
+            //criar nós
+            //vincular nós aos elementos
+            //vincular elementos ao docuemnto
+            
+
+
+
+            
+            
+                    
+
+            
+
+            B4= 0
+
+            // PLANILHA COM CAMPOS DE 0-15 E OS CAMPOS EXTRAS SIMULADOS DENTRO DO PROGRAMA PARA TESTES A PARTIR DA LINHA 324
+            
+            while (B4<arrayDeElementosParaImpressao.length) {  // criação dos campos é até o 15 (INC é o último campo); 16 setado pelo 17; ajusta campo 17 que era undefined ou branco por falta de captura do histórico do SINAFWEB e 18 que só era preenchido quando havia correpondência de valores C e D ainda que soma não desse zero (mas linha só pintada quando soma é zero)
+
+                if  (arrayDeElementosParaImpressao[B4][17] === "--------"  && (arrayDeElementosParaImpressao[B4][10] === "3142" || arrayDeElementosParaImpressao[B4][10] === "1107")) {
+                arrayDeElementosParaImpressao[B4][17] = "<Não Capturado no SINAFWEB>" // só pode haver captura de valores autenticados no cx ou sinafs (dúvida: 1207)
+                }
+
+                
+
+                if  ( arrayDeElementosParaImpressao[B4][16] === "--------" && arrayDeElementosParaImpressao[B4][17] === "<Não Capturado no SINAFWEB>") {
+                arrayDeElementosParaImpressao[B4][16] = "<Não Capturado no SINAFWEB>" // mostra na célula que não pode existir número pq não houve captura no sinafweb do histórico
+                }
+
+                if  ( arrayDeElementosParaImpressao[B4][16] === "--------" && arrayDeElementosParaImpressao[B4][17] !== "<Não Capturado no SINAFWEB>" && (arrayDeElementosParaImpressao[B4][10] === "3142" || arrayDeElementosParaImpressao[B4][10] === "1107")) {
+                arrayDeElementosParaImpressao[B4][16] = "<Padrão não localizado>" // mostra na célula que não pode existir número pq não houve captura no sinafweb do histórico
+                }
+
+                
+               
+
+                B4++
+
+            }
+
+            B4=0
+            
+            
+
+            //console.log(ObjetoSomasDoc)
+
+            
+
+
+
+            var linhas ={}
+            var sr = []
+            var valor_sr = []
+            var uf = []
+            var valor_uf = []
+            var unidade = []
+            var valor_unidade = []
+            var analitico = []
+            var valor_analitico = []
+            var nome = []
+            var valor_nome = []
+            var dataMov = []
+            var valor_dataMov = []
+            var dataEfet = []
+            var valor_dataEfet = []
+            var origem = []
+            var valor_origem = []
+            var evento = []
+            var valor_evento = []
+            var doc = []
+            var valor_doc = []
+            var ol = []
+            var valor_ol = []
+            var valorModulo = []
+            var valor_valorModulo = []
+            var dc = []
+            var valor_dc = []
+            var valor = []
+            var valor_valor = []
+            var aviso = []
+            var valor_aviso = []
+            var incoerente = []
+            var valor_incoerente = []
+            var numeroHistorico = []
+            var valor_numeroHistorico = []
+            var historico = []
+            var valor_historico = []
+            var referenciaDoc =[]
+            var valor_referenciaDoc =[]
+            var numeroLinha = []
+            var valor_numeroLinha = []
+
+            //SR;UF;Unidade;Analítico;Nome;Data Mov;Data Efet;Origem;Evento;Doc;OL;Valor-Módulo;D/C;Valor;Aviso;Incoerente;
+
+            var linha = 0
+            cont=0
+
+            tbody = document.querySelector('#tbody')
+            
+            while (linha<arrayLinhasAgMov.length) {
+
+                linhas[linha]=0
+                sr[linha]=0
+                valor_sr[linha]=0
+                uf[linha]=0
+                valor_uf[linha]=0
+                unidade[linha]=0
+                valor_unidade[linha]=0
+                analitico[linha]=0
+                valor_analitico[linha]=0
+                nome[linha]=0
+                valor_nome[linha]=0
+                dataMov[linha]=0
+                valor_dataMov[linha]=0
+                dataEfet[linha]=0
+                valor_dataEfet[linha]=0
+                origem[linha]=0
+                valor_origem[linha]=0
+                evento[linha]=0
+                valor_evento[linha]=0
+                doc[linha]=0
+                valor_doc[linha]=0
+                ol[linha] =0
+                valor_ol[linha]=0
+                valorModulo[linha]=0
+                valor_valorModulo[linha] = 0
+                valor[linha] = 0
+                valor_valor[linha] = 0
+                aviso[linha]=0
+                valor_aviso[linha]=0
+                incoerente[linha]=0
+                valor_incoerente[linha]=0
+                numeroHistorico[linha]=0
+                valor_numeroHistorico[linha]=0
+                historico[linha]=0
+                valor_historico[linha]= 0
+                referenciaDoc[linha] = 0
+                valor_referenciaDoc[linha] = 0
+                numeroLinha[linha] = 0
+                valor_numeroLinha[linha] = 0
+
+                //SR;UF;Unidade;Analítico;Nome;Data Mov;Data Efet;Origem;Evento;Doc;OL;Valor-Módulo;D/C;Valor;Aviso;Incoerente;
+                
+                
+
+            
+
+                linhas[linha] = document.createElement('tr')
+
+                if (arrayDePintura[linha]) {
+
+                    linhas[linha].className = "laranja"   
+
+
+                }
+
+                if (arrayDePinturaAzul[linha]) {
+
+                    linhas[linha].className = "azul"   
+
+
+                }
+
+                sr[linha] = document.createElement('td');
+                uf[linha] = document.createElement('td');
+                unidade[linha] = document.createElement('td');
+                analitico[linha] = document.createElement('td');
+                nome[linha] = document.createElement('td');
+                dataMov[linha] = document.createElement('td');
+                dataEfet[linha] = document.createElement('td');
+                origem[linha] = document.createElement('td');
+                evento[linha] = document.createElement('td');
+                doc[linha] = document.createElement('td');
+                ol[linha] = document.createElement('td');
+                valorModulo[linha] = document.createElement('td');
+                dc[linha] = document.createElement('td');
+                valor[linha] = document.createElement('td');
+                aviso[linha] = document.createElement('td');
+                incoerente[linha] = document.createElement('td');
+                numeroHistorico[linha] = document.createElement('td');
+                historico[linha] = document.createElement('td');
+                referenciaDoc[linha] = document.createElement('td');
+                numeroLinha[linha] = document.createElement('td');
+
+
+                
+
+                //SR;UF;Unidade;Analítico;Nome;Data Mov;Data Efet;Origem;Evento;Doc;OL;Valor-Módulo;D/C;Valor;Aviso;Incoerente;
+                
+                valor_sr[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][0]);
+                valor_uf[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][1]);
+                valor_unidade[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][2]);
+                valor_analitico[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][3]);
+                valor_nome[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][4]);
+                valor_dataMov[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][5]);
+                valor_dataEfet[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][6]);
+                valor_origem[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][7]);
+                valor_evento[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][8]);
+                valor_doc[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][9]);
+                valor_ol[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][10]);
+                valor_valorModulo[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][11]);
+                valor_dc[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][12]);
+                valor_valor[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][13]);
+                valor_aviso[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][14]);
+                valor_incoerente[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][15]);
+                valor_numeroHistorico[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][16]);
+                valor_historico[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][17]);
+                valor_referenciaDoc[linha] = document.createTextNode(arrayDeElementosParaImpressao[cont][18]);
+                valor_numeroLinha[linha] = document.createTextNode(linha+1); // ajustar; linha+1 para ajustar a layout das planilhas convencionais
+
+
+
+	
+                //SR;UF;Unidade;Analítico;Nome;Data Mov;Data Efet;Origem;Evento;Doc;OL;Valor-Módulo;D/C;Valor;Aviso;Incoerente;
+
+                sr[linha].appendChild(valor_sr[linha])
+                uf[linha].appendChild(valor_uf[linha])
+                unidade[linha].appendChild(valor_unidade[linha])
+                analitico[linha].appendChild(valor_analitico[linha])
+                nome[linha].appendChild(valor_nome[linha])
+                dataMov[linha].appendChild(valor_dataMov[linha])
+                dataEfet[linha].appendChild(valor_dataEfet[linha])
+                origem[linha].appendChild(valor_origem[linha])
+                evento[linha].appendChild(valor_evento[linha])
+                doc[linha].appendChild(valor_doc[linha])
+                ol[linha].appendChild(valor_ol[linha])
+                valorModulo[linha].appendChild(valor_valorModulo[linha])
+                dc[linha].appendChild(valor_dc[linha])
+                valor[linha].appendChild(valor_valor[linha])
+                aviso[linha].appendChild(valor_aviso[linha])
+                incoerente[linha].appendChild(valor_incoerente[linha])
+                numeroHistorico[linha].appendChild(valor_numeroHistorico[linha])
+                historico[linha].appendChild(valor_historico[linha])
+                referenciaDoc[linha].appendChild(valor_referenciaDoc[linha])
+                numeroLinha[linha].appendChild(valor_numeroLinha[linha])
+
+                //SR;UF;Unidade;Analítico;Nome;Data Mov;Data Efet;Origem;Evento;Doc;OL;Valor-Módulo;D/C;Valor;Aviso;Incoerente;
+                
+                //console.log(linhas[linha])
+                //console.log(sr[linha])
+
+                linhas[linha].appendChild(sr[linha])
+                linhas[linha].appendChild(uf[linha])
+                linhas[linha].appendChild(unidade[linha])
+                linhas[linha].appendChild(analitico[linha])
+                linhas[linha].appendChild(nome[linha])
+                linhas[linha].appendChild(dataMov[linha])
+                linhas[linha].appendChild(dataEfet[linha])
+                linhas[linha].appendChild(origem[linha])
+                linhas[linha].appendChild(evento[linha])
+                linhas[linha].appendChild(doc[linha])
+                linhas[linha].appendChild(ol[linha])
+                linhas[linha].appendChild(valorModulo[linha])
+                linhas[linha].appendChild(dc[linha])
+                linhas[linha].appendChild(valor[linha])
+                linhas[linha].appendChild(aviso[linha])
+                linhas[linha].appendChild(incoerente[linha])
+                linhas[linha].appendChild(numeroHistorico[linha])
+                linhas[linha].appendChild(historico[linha])
+                linhas[linha].appendChild(referenciaDoc[linha])
+                linhas[linha].appendChild(numeroLinha[linha])
+
+                //SR;UF;Unidade;Analítico;Nome;Data Mov;Data Efet;Origem;Evento;Doc;OL;Valor-Módulo;D/C;Valor;Aviso;Incoerente;
+                
+
+                tbody.appendChild(linhas[linha])
+                linha++
+                cont++
+            }
+
+            //while ()
+
+
+            //console.log(arrayDoc);
+            console.log('Eu cheguei ao fim')
+            
+            //criar elementos
+            //aplicar um estilo no elemento
+            //criar nós
+            //vincular nós aos elementos
+            //vincular elementos ao docuemnto
+            
+
+
+        
+
+
+            //SR;UF;Unidade;Analítico;Nome;Data Mov;Data Efet;Origem;Evento;Doc;OL;Valor-Módulo;D/C;Valor;Aviso;Incoerente;
+
+            
+        }
+        
+    }
+    
+
+    
+
+    
+
+</script>
